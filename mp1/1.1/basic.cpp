@@ -3,7 +3,7 @@
 #include <queue>
 
 using namespace std;
-
+int w,h;
 
 int DFS(int ** maze, int startx, int starty, int endx, int endy){
 
@@ -23,7 +23,7 @@ int AStar(int ** maze, int startx, int starty, int endx, int endy) {
 }
 
 int** maze_reader(char* filename) {
-	i//nt ** a = 
+	//int ** a = 
 }
 
 void maze_printer(int ** result) {
