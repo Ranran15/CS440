@@ -12,7 +12,6 @@ int endx,endy;
 
 struct PairComparator {
 	bool operator()(pair<int,int> n1,pair<int,int> n2) {
-	        //return n1.second>n2.second;
 			return ((endx-n1.first)*(endx-n1.first)+(endy-n1.second)*(endy-n1.second))>((endx-n2.first)*(endx-n2.first)+(endy-n2.second)*(endy-n2.second));
 	    }
 };
@@ -46,12 +45,6 @@ int d(int x, int y, int endx, int endy){
 }
 
 
-struct sort_pred {
-    bool operator()(const std::pair< pair<int,int>,int> &left, const std::pair< pair<int,int>,int> &right) {
-        return left.second > right.second;
-    }
-};
-
 int Greedy(int ** maze, int startx, int starty) {
 	int x = startx;
 	int y = starty;
@@ -70,7 +63,6 @@ int Greedy(int ** maze, int startx, int starty) {
 
 	pair <int,int> p;
 	p=make_pair(x,y);
-	//pair< pair<int,int>,int> point = make_pair(p,-1);
 
 	priority_queue< pair<int,int>,vector<pair<int,int> >,PairComparator> q;
 
@@ -81,12 +73,9 @@ int Greedy(int ** maze, int startx, int starty) {
 	
 	while(!q.empty()){
 		//cout<<q.size()<<endl;
-
 		pair<int,int> cur = q.top();
 		q.pop();
 		cost++;
-
-		
 		//visit right, up, left, down
 		// if wall, ignore
 		// if goal return cost
@@ -94,8 +83,6 @@ int Greedy(int ** maze, int startx, int starty) {
 		// if not visited, calculate distance, only add the nodes with shortest distance
 		pair<int,int> right = make_pair(cur.first+1,cur.second);
 		int status = valid(right.first, right.second, maze);
-		
-		//cout<<parent[right.first][right.second].first<<", "<<parent[right.first][right.second].second<<endl;
 		if(status==2){
 			parent[right.second][right.first]=cur;
 			expend++;
@@ -103,9 +90,6 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		else if(status==1){
 			//unvisited
-			//int curdist = d(right.first,right.second,endx,endy);
-			//if(dist<0||dist>curdist)dist=curdist;
-			//cout<<"add: "<<right.first<<", "<<right.second<<endl;
 			maze[right.second][right.first]=2;
 			parent[right.second][right.first]=cur;
 			q.push(right);
@@ -116,8 +100,6 @@ int Greedy(int ** maze, int startx, int starty) {
 		//up
 		pair<int,int> up = make_pair(cur.first,cur.second+1);
 		status = valid(up.first, up.second,maze);
-		
-		//cout<<parent[up.first][up.second].first<<", "<<parent[up.first][up.second].second<<endl;
 
 		if(status==2) {
 			parent[up.second][up.first]=cur;
@@ -135,9 +117,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		//left
 		pair<int,int> left = make_pair(cur.first-1,cur.second);
 		status = valid(left.first,left.second,maze);
-		//parent[left.second][left.first]=cur;
-		//cout<<parent[left.first][left.second].first<<", "<<parent[left.first][left.second].second<<endl;
-
+		
 		if(status==2) {
 			parent[left.second][left.first]=cur;
 			expend++;
@@ -153,9 +133,7 @@ int Greedy(int ** maze, int startx, int starty) {
 
 		//down
 		pair<int,int> down = make_pair(cur.first,cur.second-1);
-		
 		status = valid(down.first,down.second,maze);
-		//cout<<parent[down.first][down.second].first<<", "<<parent[down.first][down.second].second<<endl;
 		if(status==2){
 			parent[down.second][down.first]=cur;
 			expend++;
@@ -173,12 +151,10 @@ int Greedy(int ** maze, int startx, int starty) {
 	int t1=endx;
 	int t2=endy;
 
-	//doesn't work!!!!
 	while(1){
 		if(t1==startx&&t2==starty)break;
 
 		maze[t2][t1]=5;
-		//cout<<"back, xy: "<<t1<<" "<<t2<<endl;
 		pair<int,int> prev = parent[t2][t1];
 		t1=prev.first;
 		t2=prev.second;
@@ -193,6 +169,26 @@ int Greedy(int ** maze, int startx, int starty) {
 		cout<<""<<endl;
 	}
 	cout<<"expended node: "<<expend<<endl;
+
+
+
+/*
+	write solution to a file
+*/
+	ofstream myfile;
+	myfile.open ("solution.txt");
+	for(int i=0;i<h;i++){
+		for(int j=0;j<w;j++){
+			if(maze[i][j]==1)
+				myfile<<"%";
+			else if(maze[i][j]==2)
+				myfile<<".";
+			else if(maze[i][j]==0)
+				myfile<<" ";
+		}
+		myfile<<"\n";
+	}
+	myfile.close();
 	return cost;
 	
 }
@@ -214,11 +210,21 @@ int main(int argc, char const *argv[])
 {
 	char* filename = (char*)argv[1];
 
+
+/*
+ *Maze Reader starts here:
+ read file and put it in maze array
+*/
+
+ /*
+		0: Empty
+		1: Wall
+		2: Dot
+		3: Goal
+	*/
 	ifstream myReadFile;
 	myReadFile.open(filename);
 	string s;
-
-
 
 	int** maze = new int*[38];
 	for(int i = 0; i < 38; ++i)
@@ -259,23 +265,13 @@ int main(int argc, char const *argv[])
 
 	cout<<"end x: "<<endx<<endl;
 	cout<<"endy: "<<endy<<endl;
-/*
-	for(int i=0;i<h;i++){
-		for(int j=0;j<w;j++){
-			cout<<maze[i][j];
-		}
-		cout<<""<<endl;
-	}*/
 
 	maze_reader(filename);
 
 	int c = Greedy(maze,startx,starty);
 	cout<<"cost: "<<c<<endl;
-	/*
-		0: Empty
-		1: Wall
-		2: Dot
-		3: Goal
-	*/
+
+	
+	
 	return 0;
 }
