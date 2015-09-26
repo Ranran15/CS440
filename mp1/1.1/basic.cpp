@@ -34,7 +34,7 @@ int valid(int x, int y, int ** maze){
 	if(x<0||y<0||x>=w||y>=h)return 0;
 
 	int status = maze[y][x];
-	if(status==1||status==2)return 0;
+	if(status==1||status==2||status==5)return 0;
 	else if(status==0) return 1;
 	return 2;
 }
@@ -90,7 +90,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		else if(status==1){
 			//unvisited
-			maze[right.second][right.first]=2;
+			maze[right.second][right.first]=5;
 			parent[right.second][right.first]=cur;
 			q.push(right);
 			expend++;
@@ -108,7 +108,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		else if(status==1){
 			//unvisited
-			maze[up.second][up.first]=2;
+			maze[up.second][up.first]=5;
 			parent[up.second][up.first]=cur;
 			expend++;
 			q.push(up);
@@ -125,7 +125,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		else if(status==1){
 			//unvisited
-			maze[left.second][left.first]=2;
+			maze[left.second][left.first]=5;
 			parent[left.second][left.first]=cur;
 			expend++;
 			q.push(left);
@@ -141,7 +141,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		else if(status==1){
 			//unvisited
-			maze[down.second][down.first]=2;
+			maze[down.second][down.first]=5;
 			parent[down.second][down.first]=cur;
 			expend++;
 			q.push(down);
@@ -154,7 +154,7 @@ int Greedy(int ** maze, int startx, int starty) {
 	while(1){
 		if(t1==startx&&t2==starty)break;
 
-		maze[t2][t1]=5;
+		maze[t2][t1]=2;
 		pair<int,int> prev = parent[t2][t1];
 		t1=prev.first;
 		t2=prev.second;
@@ -162,12 +162,13 @@ int Greedy(int ** maze, int startx, int starty) {
 
 	for(int i=0;i<h;i++){
 		for(int j=0;j<w;j++){
-			if(maze[i][j]==2)maze[i][j]=0;
-			if(maze[i][j]==5)maze[i][j]=2;
+			if(maze[i][j]==5)maze[i][j]=0;
+			//if(maze[i][j]==5)maze[i][j]=2;
 			cout<<maze[i][j];
 		}
 		cout<<""<<endl;
 	}
+	//maze[startx][starty]=2;
 	cout<<"expended node: "<<expend<<endl;
 
 
@@ -179,6 +180,7 @@ int Greedy(int ** maze, int startx, int starty) {
 	myfile.open ("solution.txt");
 	for(int i=0;i<h;i++){
 		for(int j=0;j<w;j++){
+			//if(startx==j&&starty==i)myfile<<".";
 			if(maze[i][j]==1)
 				myfile<<"%";
 			else if(maze[i][j]==2)
