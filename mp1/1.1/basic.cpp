@@ -62,7 +62,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 		cout<<""<<endl;
 	}
-	
+	int expend=0;
 
 	pair<int,int>**parent = new pair<int,int>*[38];
 	for(int i = 0; i < 38; ++i)
@@ -75,6 +75,7 @@ int Greedy(int ** maze, int startx, int starty) {
 	priority_queue< pair<int,int>,vector<pair<int,int> >,PairComparator> q;
 
 	q.push(p);
+	expend++;
 	cout<<"start: "<<p.first<<", "<<p.second<<endl;
 	int cost = 0;
 	
@@ -93,55 +94,78 @@ int Greedy(int ** maze, int startx, int starty) {
 		// if not visited, calculate distance, only add the nodes with shortest distance
 		pair<int,int> right = make_pair(cur.first+1,cur.second);
 		int status = valid(right.first, right.second, maze);
-		parent[right.second][right.first]=cur;
+		
 		//cout<<parent[right.first][right.second].first<<", "<<parent[right.first][right.second].second<<endl;
-		if(status==2) break;
+		if(status==2){
+			parent[right.second][right.first]=cur;
+			expend++;
+			break;
+		}
 		else if(status==1){
 			//unvisited
 			//int curdist = d(right.first,right.second,endx,endy);
 			//if(dist<0||dist>curdist)dist=curdist;
-			cout<<"add: "<<right.first<<", "<<right.second<<endl;
+			//cout<<"add: "<<right.first<<", "<<right.second<<endl;
 			maze[right.second][right.first]=2;
+			parent[right.second][right.first]=cur;
 			q.push(right);
+			expend++;
 		}
 
 
 		//up
 		pair<int,int> up = make_pair(cur.first,cur.second+1);
 		status = valid(up.first, up.second,maze);
-		parent[up.second][up.first]=cur;
+		
 		//cout<<parent[up.first][up.second].first<<", "<<parent[up.first][up.second].second<<endl;
 
-		if(status==2) break;
+		if(status==2) {
+			parent[up.second][up.first]=cur;
+			expend++;
+			break;
+		}
 		else if(status==1){
 			//unvisited
 			maze[up.second][up.first]=2;
-						q.push(up);
+			parent[up.second][up.first]=cur;
+			expend++;
+			q.push(up);
 		}
 
 		//left
 		pair<int,int> left = make_pair(cur.first-1,cur.second);
 		status = valid(left.first,left.second,maze);
-		parent[left.second][left.first]=cur;
+		//parent[left.second][left.first]=cur;
 		//cout<<parent[left.first][left.second].first<<", "<<parent[left.first][left.second].second<<endl;
 
-		if(status==2) break;
+		if(status==2) {
+			parent[left.second][left.first]=cur;
+			expend++;
+			break;
+		}
 		else if(status==1){
 			//unvisited
-		maze[left.second][left.first]=2;
+			maze[left.second][left.first]=2;
+			parent[left.second][left.first]=cur;
+			expend++;
 			q.push(left);
 		}
 
 		//down
 		pair<int,int> down = make_pair(cur.first,cur.second-1);
-		parent[down.second][down.first]=cur;
+		
 		status = valid(down.first,down.second,maze);
 		//cout<<parent[down.first][down.second].first<<", "<<parent[down.first][down.second].second<<endl;
-		if(status==2) break;
+		if(status==2){
+			parent[down.second][down.first]=cur;
+			expend++;
+			break;
+		}
 		else if(status==1){
 			//unvisited
 			maze[down.second][down.first]=2;
-			
+			parent[down.second][down.first]=cur;
+			expend++;
 			q.push(down);
 		}
 
@@ -150,21 +174,25 @@ int Greedy(int ** maze, int startx, int starty) {
 	int t2=endy;
 
 	//doesn't work!!!!
-	/*while(!(t1==startx&&t2==starty)){
+	while(1){
+		if(t1==startx&&t2==starty)break;
+
 		maze[t2][t1]=5;
-		cout<<"back, xy: "<<t1<<" "<<t2<<endl;
+		//cout<<"back, xy: "<<t1<<" "<<t2<<endl;
 		pair<int,int> prev = parent[t2][t1];
 		t1=prev.first;
 		t2=prev.second;
-	}*/
+	}
 
 	for(int i=0;i<h;i++){
 		for(int j=0;j<w;j++){
+			if(maze[i][j]==2)maze[i][j]=0;
+			if(maze[i][j]==5)maze[i][j]=2;
 			cout<<maze[i][j];
 		}
 		cout<<""<<endl;
 	}
-
+	cout<<"expended node: "<<expend<<endl;
 	return cost;
 	
 }
