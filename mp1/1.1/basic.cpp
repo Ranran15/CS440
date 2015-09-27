@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <math.h>
 
 using namespace std;
 int w,h=0;
@@ -12,8 +13,10 @@ int endx,endy;
 
 struct PairComparator {
 	bool operator()(pair<int,int> n1,pair<int,int> n2) {
-			return ((endx-n1.first)*(endx-n1.first)+(endy-n1.second)*(endy-n1.second))>((endx-n2.first)*(endx-n2.first)+(endy-n2.second)*(endy-n2.second));
-	    }
+			//return ((endx-n1.first)*(endx-n1.first)+(endy-n1.second)*(endy-n1.second))>((endx-n2.first)*(endx-n2.first)+(endy-n2.second)*(endy-n2.second));
+	    return (abs(endx-n1.first)+abs(endy-n1.second))>(abs(endx-n2.first)+abs(endy-n2.second));
+		
+	}
 };
 
 int DFS(int ** maze, int startx, int starty, int endx, int endy){
