@@ -78,14 +78,33 @@ int Greedy(int ** maze, int startx, int starty) {
 		//cout<<q.size()<<endl;
 		pair<int,int> cur = q.top();
 		q.pop();
-		cost++;
+		//cost++;
 		//visit right, up, left, down
 		// if wall, ignore
 		// if goal return cost
 		// if visited, ignore
 		// if not visited, calculate distance, only add the nodes with shortest distance
+//up
+		pair<int,int> up = make_pair(cur.first,cur.second+1);
+		int status = valid(up.first, up.second,maze);
+
+		if(status==2) {
+			parent[up.second][up.first]=cur;
+			expend++;
+			break;
+		}
+		else if(status==1){
+			//unvisited
+			maze[up.second][up.first]=5;
+			parent[up.second][up.first]=cur;
+			expend++;
+			q.push(up);
+		}
+
+
+
 		pair<int,int> right = make_pair(cur.first+1,cur.second);
-		int status = valid(right.first, right.second, maze);
+		 status = valid(right.first, right.second, maze);
 		if(status==2){
 			parent[right.second][right.first]=cur;
 			expend++;
@@ -100,22 +119,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		}
 
 
-		//up
-		pair<int,int> up = make_pair(cur.first,cur.second+1);
-		status = valid(up.first, up.second,maze);
-
-		if(status==2) {
-			parent[up.second][up.first]=cur;
-			expend++;
-			break;
-		}
-		else if(status==1){
-			//unvisited
-			maze[up.second][up.first]=5;
-			parent[up.second][up.first]=cur;
-			expend++;
-			q.push(up);
-		}
+		
 
 		//left
 		pair<int,int> left = make_pair(cur.first-1,cur.second);
@@ -161,6 +165,7 @@ int Greedy(int ** maze, int startx, int starty) {
 		pair<int,int> prev = parent[t2][t1];
 		t1=prev.first;
 		t2=prev.second;
+		cost++;
 	}
 
 	for(int i=0;i<h;i++){
