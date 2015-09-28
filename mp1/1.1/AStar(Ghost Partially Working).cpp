@@ -12,6 +12,7 @@ int w,h=0;
 int endx,endy;
 int startx, starty=0;
 int Ghostx,Ghosty;
+int smallx=-1,bigx=-1;
 int Gdirection=1;//1: move right   -1: move left
 
 const int IDIM = 38; // horizontal size of the squares
@@ -81,7 +82,13 @@ class Node
         {
              FValue = GValue + getHValue(locDest); 
         }
+        void setFValue(int f){
+        	FValue=f;
+        }
 
+        void setGValue(int g){
+        	GValue=g;
+        }
         
         void updateGValue(const int & i, int prev) // i: direction
         {
@@ -185,13 +192,12 @@ string pathFind( const Location &locStart ,
     pNode1 = new Node(locStart, 0, 0); 
     pNode1->calculateFValue(locFinish);
     q[qi].push(*pNode1);
-    //moveGhost();
+    moveGhost();
     //Maze[Ghosty][Ghostx]=9;
     // A* search
     while(!q[qi].empty()) {
 
         
-
 
         // get the current node w/ the lowest FValue
         // from the list of open nodes
@@ -199,33 +205,13 @@ string pathFind( const Location &locStart ,
                      q[qi].top().getGValue(), q[qi].top().getFValue());
 
         row = (pNode1->getLocation()).row; 
-	col = pNode1->getLocation().col;
-	cout << "row, col=" << row << "," << col << endl;
-    //Maze[col][row]=2;
-    /*
-    for(int a=0;a<h;a++){
-        for(int b=0;b<w;b++){
-            //if(maze[i][j]==5)maze[i][j]=0;
-            //if(maze[i][j]==5)maze[i][j]=2;
-            cout<<Maze[a][b];
-        }
-        cout<<""<<endl;
-    }*/
+		col = pNode1->getLocation().col;
+
 
         // stop searching when the goal state is reached
         if(row == locFinish.row && col == locFinish.col) {
 		// drawing direction map
-           
-/*
-        cout << endl;
-        for(j = 0; j <=JDIM - 1; j++) {
-            for(i = 0; i < IDIM; i++) {
-                cout << dirMap[j][i];
-            }
-            cout << endl;
-        }
-        cout << endl;
-*/
+
 
 
 	    // generate the path from finish to start from dirMap
@@ -257,36 +243,46 @@ string pathFind( const Location &locStart ,
 
         // mark it on the closed nodes list
         closedNodes[col][row] = 1;
-
+//moveGhost();
         // generate moves in all possible directions
         for(i = 0; i < NDIR; i++) {
             iNext = row + iDir[i]; 
 	        jNext = col + jDir[i];
 
+
+	        pNode2 = new Node( Location(iNext, jNext), pNode1->getGValue(), pNode1->getFValue());
+            int prevdirection = (dirMap[col][row]+ 2) % 4;
+            pNode2->updateGValue(i,prevdirection);   
 	    // if not wall (obstacle) nor in the closed list
             if(!(iNext < 0 || iNext > IDIM - 1 || jNext < 0 || jNext > JDIM - 1 || 
-			Maze[jNext][iNext] == 1 || closedNodes[jNext][iNext] == 1)) {
-               
-		// generate a child node
-                pNode2 = new Node( Location(iNext, jNext), pNode1->getGValue(), pNode1->getFValue());
-                int prevdirection = (dirMap[col][row]+ 2) % 4;
-                pNode2->updateGValue(i,prevdirection);
-                pNode2->calculateFValue(locFinish);
+			Maze[jNext][iNext] == 1 || closedNodes[jNext][iNext] == 1) ) 
+			{
+   				pNode2->calculateFValue(locFinish);
+
 
                 // if it is not in the open list then add into that
                 bool fail = touchGhost(row,col,iNext,jNext);
-                if(openNodes[jNext][iNext] == 0 &&(!fail)) {
+                if(fail)pNode2->setGValue(100000);
+
+
+		// generate a child node
+                
+                if(openNodes[jNext][iNext] == 0 || (pNode1->getGValue()+1<pNode2->getGValue())) {
                     openNodes[jNext][iNext] = pNode2->getFValue();
+                    pNode2->updateGValue(i,prevdirection); 
                     q[qi].push(*pNode2);
-                    moveGhost();
+                    
                     //Maze[Ghosty][Ghostx]=9;
-                    cout<<"Ghost x, y:"<<Ghostx<<", "<<Ghosty<<endl;
+                   // cout<<"Ghost x, y:"<<Ghostx<<", "<<Ghosty<<endl;
 
 
                     // mark its parent node direction
                     dirMap[jNext][iNext] = (i + 2) % 4;
+                    if(openNodes[jNext][iNext]==0){
+                    	openNodes[jNext][iNext]=1;
+                    }
                 }
-
+/*
 		// already in the open list
                 else if(openNodes[jNext][iNext] > pNode2->getFValue()&&(!fail)) {
                     // update the FValue info
@@ -321,10 +317,11 @@ string pathFind( const Location &locStart ,
 
 		    // add the better node instead
                     q[qi].push(*pNode2); 
-                }
-                else delete pNode2;            }
+                }*/
+               // else delete pNode2;            
+            }
         }
-        delete pNode1; 
+        //delete pNode1; 
     }
     // no path found
     return ""; 
@@ -364,14 +361,23 @@ void MazeReader(char* filename) {
                 }else if(s.at(i)==' '||s.at(i)=='p'){
                     //empty
                     Maze[h][i]=0;
-                }else if(s.at(i)=='P'||s.at(i)=='p'){
+                }else if(s.at(i)=='P'){
                     Maze[h][i]=3;
                     endx=i;
                     endy=h;
-                }else if(s.at(i)=='G'){
-                    Ghostx=i;
-                    Ghosty=h;
-                    Maze[h][i]=9;
+                }else if(s.at(i)=='G'||s.at(i)=='g'){
+                	if(smallx==-1){
+                		smallx=i;
+                		bigx=i;
+                	}else{
+                		smallx = i<smallx?i:smallx;
+                		bigx=i>bigx?i:bigx;
+                	}
+                	if(s.at(i)=='G'){
+	                    Ghostx=i;
+	                    Ghosty=h;
+                	}
+                    Maze[h][i]=0;
                 }
 
             }
@@ -381,6 +387,7 @@ void MazeReader(char* filename) {
     cout<<"w: "<<w<<endl;
     cout<<"h: "<<h<<endl;
 
+    cout<<"Ghost bound: "<<smallx<<", "<<bigx<<endl;
     cout<<"endx: "<<endx<<endl;
     cout<<"endy: "<<endy<<endl;
 }
